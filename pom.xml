@@ -34,7 +34,14 @@
             <artifactId>jetty-servlet</artifactId>
             <version>9.4.14.v20181114</version>
         </dependency>
-        
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.15</version>
+        </dependency>
+
+
     </dependencies>
 
 
