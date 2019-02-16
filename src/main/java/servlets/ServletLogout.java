@@ -31,6 +31,7 @@ public class ServletLogout extends HttpServlet {
             userCookie.setMaxAge(0);
             resp.addCookie(userCookie);
             writer.println("User [" + user.getLogin() + "] is logout!");
+            resp.sendRedirect("/login");
         } else {
             writer.println("User is not authorized!");
         }

@@ -2,7 +2,6 @@ package servlets;
 
 import dao.ActionDAOImpl;
 import dao.UserDAOImpl;
-import models.ActionModel;
 import models.UserModel;
 import utils.CookiesObserver;
 import utils.ParameterFromRequest;
@@ -14,8 +13,21 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 public class ServletCalculator extends HttpServlet {
+
+    private final Connection connection;
+
+    public ServletCalculator(Connection connection) {
+        this.connection = connection;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -59,10 +71,28 @@ public class ServletCalculator extends HttpServlet {
             }
             String action = String.format("%d %s %d = %d", a, operation, b, result);
             resp.getWriter().printf(action);
-            actionDAO.addAction(new ActionModel(action, user));
+            try {
+                saveOperationToDB(a, operation, b, result);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            //actionDAO.addAction(new ActionModel(action, user));
         } else {
             writer.println("User is not authorized!");
         }
+    }
+
+    private void saveOperationToDB(int a, String operation, int b, int result) throws SQLException {
+        String sql = "insert into history (a, op, b, result) values (?, ?, ?, ?, ?, ?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, a);
+        preparedStatement.setString(2, operation);
+        preparedStatement.setInt(3, b);
+        preparedStatement.setInt(4, result);
+        UserDAOImpl userDAO = UserDAOImpl.getInstance();
+        preparedStatement.setInt(5, userDAO.hashCode());
+        preparedStatement.setString(6, String.valueOf(new Date().getTime()));
+        preparedStatement.execute();
     }
 
 }
